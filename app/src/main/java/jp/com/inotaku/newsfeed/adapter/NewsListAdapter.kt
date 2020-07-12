@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import jp.com.inotaku.R
 import jp.com.inotaku.newsfeed.data.News
 import kotlinx.android.extensions.LayoutContainer
@@ -32,9 +33,15 @@ class NewsListAdapter(private val activity: Activity) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val selectedNews = newsList[position]
 
+        // 画像の設定
+        selectedNews?.let {
+            Glide.with(activity).load(selectedNews.imageUri).into(holder.imgNewsHeader)
+        }
+
+        // タイトル・掲載日・説明の設定
         holder.run {
             txtNewsTitle.text = selectedNews.title
-            txtPublishDate.text = selectedNews.publishData
+            txtPublishDate.text = selectedNews.publishDate
             txtDesc.text = selectedNews.description
         }
     }
