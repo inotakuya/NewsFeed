@@ -1,6 +1,8 @@
 package jp.com.inotaku.newsfeed.adapter
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,8 +36,8 @@ class NewsListAdapter(private val activity: Activity) :
         val selectedNews = newsList[position]
 
         // 画像の設定
-        selectedNews?.let {
-            Glide.with(activity).load(selectedNews.imageUri).into(holder.imgNewsHeader)
+        selectedNews.imageUri?.let { imageUri ->
+            Glide.with(activity).load(imageUri).into(holder.imgNewsHeader)
         }
 
         // タイトル・掲載日・説明の設定
@@ -43,6 +45,11 @@ class NewsListAdapter(private val activity: Activity) :
             txtNewsTitle.text = selectedNews.title
             txtPublishDate.text = selectedNews.publishDate
             txtDesc.text = selectedNews.description
+        }
+
+        holder.itemView.setOnClickListener {
+            // タップしたときに設定してあるurlのページに遷移する
+            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(selectedNews.url)))
         }
     }
 }
