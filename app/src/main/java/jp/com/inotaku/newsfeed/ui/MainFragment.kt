@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import jp.com.inotaku.R
 import jp.com.inotaku.newsfeed.adapter.NewsListAdapter
+import jp.com.inotaku.newsfeed.utils.LoadStatus
 import jp.com.inotaku.newsfeed.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
 
@@ -50,22 +51,31 @@ class MainFragment : Fragment() {
         }
 
         searchButton.setOnClickListener {
-            // キーボードを非表示にする
-            val imm =
-                requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(it.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
-
-            // ニュースリストを取得
-            viewModel.getNewsList(inputSearchWord.text.toString())
-            observerViewModel()
-
+            searchButtonOnClick(it)
         }
+    }
+
+    /**
+     * 検索ボタン押下イベント
+     */
+    private fun searchButtonOnClick(view: View) {
+        // キーボードを非表示にする
+        val imm =
+            requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+
+        // ニュースリストを取得
+        viewModel.getNewsList(inputSearchWord.text.toString())
+        // observerの設定
+        observerViewModel()
     }
 
     /**
      * observerの設定
      */
     private fun observerViewModel() {
+
+        // ニュースリスト監視
         viewModel.newsList.observe(requireActivity(), Observer { newsList ->
             // 検索ワードの表示を設定
             txtSearchWord.text = inputSearchWord.text.toString()
@@ -74,8 +84,14 @@ class MainFragment : Fragment() {
             newsList?.let {
                 newsListAdapter.newsList = it
             }
+
             // リストを更新
             newsListAdapter.notifyDataSetChanged()
+        })
+
+        // ロード状態監視
+        viewModel.getState().observe(requireActivity(), Observer { status ->
+            progressBar.visibility = if (status == LoadStatus.LOADING) View.VISIBLE else View.GONE
         })
     }
 

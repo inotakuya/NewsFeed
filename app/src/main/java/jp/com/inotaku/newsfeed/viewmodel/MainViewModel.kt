@@ -3,47 +3,35 @@ package jp.com.inotaku.newsfeed.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import jp.com.inotaku.newsfeed.api.NewsApiService
+import androidx.lifecycle.viewModelScope
+import jp.com.inotaku.newsfeed.NewsRepository
 import jp.com.inotaku.newsfeed.data.News
-import jp.com.inotaku.newsfeed.data.NewsResponse
-import jp.com.inotaku.newsfeed.utils.makeToast
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import jp.com.inotaku.newsfeed.utils.LoadStatus
+import kotlinx.coroutines.launch
 
+/**
+ * メインViewModel
+ */
 class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     // ニュースリスト
     var newsList = MutableLiveData<List<News>>()
 
-    // apiサービス
-    private val newsApiService: NewsApiService by lazy {
-        NewsApiService.createApiService()
+    // ニュースリポジトリ
+    private val repository: NewsRepository by lazy {
+        NewsRepository(app)
     }
+
+    // ロードステータス
+    fun getState(): MutableLiveData<LoadStatus> = repository.loadStatus
 
     /**
      * ニュースリストを取得
      * @param searchWord 検索文字
      */
     fun getNewsList(searchWord: String) {
-        try {
-            newsApiService.getNews(searchWord)
-                .enqueue(object : Callback<NewsResponse> {
-                    override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                        makeToast(app, t.message!!)
-                    }
-
-                    override fun onResponse(
-                        call: Call<NewsResponse>,
-                        response: Response<NewsResponse>
-                    ) {
-                        newsList.value = response.body()?.newsList
-                    }
-                })
-
-        } catch (e: Exception) {
-            makeToast(app, "Exception: ${e.message}")
-            e.printStackTrace()
+        viewModelScope.launch {
+            newsList.value = repository.getNews(searchWord)
         }
     }
 

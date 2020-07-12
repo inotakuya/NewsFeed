@@ -16,11 +16,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 interface NewsApiService {
 
     @GET("everything")
-    fun getNews(
+    suspend fun getNews(
         @Query("q") searchString: String,
         @Query("apikey") apiKey: String = API_KEY,
         @Query("pageSize") pageSize: Int = PAGESIZE
-    ): Call<NewsResponse>
+    ): Response<NewsResponse>
 
     companion object {
         /**
