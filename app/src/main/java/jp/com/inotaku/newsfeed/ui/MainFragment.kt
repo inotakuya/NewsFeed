@@ -2,21 +2,18 @@ package jp.com.inotaku.newsfeed.ui
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import jp.com.inotaku.R
 import jp.com.inotaku.newsfeed.adapter.NewsListAdapter
-import jp.com.inotaku.newsfeed.api.NewsApiService
-import jp.com.inotaku.newsfeed.data.NewsResponse
-import jp.com.inotaku.newsfeed.utils.makeToast
+import jp.com.inotaku.newsfeed.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 /**
@@ -24,10 +21,8 @@ import retrofit2.Response
  */
 class MainFragment : Fragment() {
 
-    // apiサービス
-    private val newsApiService: NewsApiService by lazy {
-        NewsApiService.createApiService()
-    }
+    // ViewModel
+    private val viewModel: MainViewModel by viewModels()
 
     // アダプター
     private val newsListAdapter: NewsListAdapter by lazy {
@@ -60,34 +55,28 @@ class MainFragment : Fragment() {
                 requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(it.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
 
-            try {
-                newsApiService.getNews(inputSearchWord.text.toString())
-                    .enqueue(object : Callback<NewsResponse> {
-                        override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                            makeToast(requireContext(), t.message!!)
-                        }
+            // ニュースリストを取得
+            viewModel.getNewsList(inputSearchWord.text.toString())
+            observerViewModel()
 
-                        override fun onResponse(
-                            call: Call<NewsResponse>,
-                            response: Response<NewsResponse>
-                        ) {
-                            // 検索ワードの表示を設定
-                            txtSearchWord.text = inputSearchWord.text.toString()
-                            val newsResponse = response.body()
-                            // アダプターにリストを設定
-                            newsResponse?.let {
-                                newsListAdapter.newsList = it.newsList
-                            }
-                            // リストを更新
-                            newsListAdapter.notifyDataSetChanged()
-                        }
-                    })
-
-            } catch (e: Exception) {
-                makeToast(requireContext(), "Exception: ${e.message}")
-                e.printStackTrace()
-            }
         }
+    }
+
+    /**
+     * observerの設定
+     */
+    private fun observerViewModel() {
+        viewModel.newsList.observe(requireActivity(), Observer { newsList ->
+            // 検索ワードの表示を設定
+            txtSearchWord.text = inputSearchWord.text.toString()
+
+            // アダプターにリストを設定
+            newsList?.let {
+                newsListAdapter.newsList = it
+            }
+            // リストを更新
+            newsListAdapter.notifyDataSetChanged()
+        })
     }
 
 }
