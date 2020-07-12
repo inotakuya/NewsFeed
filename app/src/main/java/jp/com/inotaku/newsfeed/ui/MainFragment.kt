@@ -65,7 +65,7 @@ class MainFragment : Fragment() {
         imm.hideSoftInputFromWindow(view.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
 
         // ニュースリストを取得
-        viewModel.getNewsList(inputSearchWord.text.toString())
+        viewModel.setSearchWord(inputSearchWord.text.toString())
         // observerの設定
         observerViewModel()
     }
