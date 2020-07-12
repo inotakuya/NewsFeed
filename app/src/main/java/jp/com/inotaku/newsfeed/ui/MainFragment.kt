@@ -12,6 +12,7 @@ import jp.com.inotaku.R
 import jp.com.inotaku.newsfeed.adapter.NewsListAdapter
 import jp.com.inotaku.newsfeed.api.NewsApiService
 import jp.com.inotaku.newsfeed.data.NewsResponse
+import jp.com.inotaku.newsfeed.utils.makeToast
 import kotlinx.android.synthetic.main.fragment_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -63,7 +64,7 @@ class MainFragment : Fragment() {
                 newsApiService.getNews(inputSearchWord.text.toString())
                     .enqueue(object : Callback<NewsResponse> {
                         override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                            println(t)
+                            makeToast(requireContext(), t.message!!)
                         }
 
                         override fun onResponse(
@@ -83,6 +84,7 @@ class MainFragment : Fragment() {
                     })
 
             } catch (e: Exception) {
+                makeToast(requireContext(), "Exception: ${e.message}")
                 e.printStackTrace()
             }
         }

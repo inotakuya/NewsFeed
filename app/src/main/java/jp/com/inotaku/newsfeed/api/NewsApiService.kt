@@ -23,6 +23,9 @@ interface NewsApiService {
     ): Call<NewsResponse>
 
     companion object {
+        /**
+         * Moshiの設定とRetrofitの設定をしてNewsApiServiceを作成する
+         */
         fun createApiService(): NewsApiService {
             val moshi = Moshi.Builder()
                 .add(KotlinJsonAdapterFactory())
