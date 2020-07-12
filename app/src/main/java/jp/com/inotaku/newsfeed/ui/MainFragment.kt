@@ -1,10 +1,12 @@
 package jp.com.inotaku.newsfeed.ui
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import jp.com.inotaku.R
 import jp.com.inotaku.newsfeed.adapter.NewsListAdapter
@@ -52,6 +54,11 @@ class MainFragment : Fragment() {
         }
 
         searchButton.setOnClickListener {
+            // キーボードを非表示にする
+            val imm =
+                requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(it.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+
             try {
                 newsApiService.getNews(inputSearchWord.text.toString())
                     .enqueue(object : Callback<NewsResponse> {
